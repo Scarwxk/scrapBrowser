@@ -31,9 +31,12 @@ app.whenReady().then(() => {
 
     win.webContents.openDevTools({ mode: 'detach' });
 
-  // Register events handling from the toolbar
+  view.webContents.on('did-start-navigation', (event, url) => {
+    win.webContents.send('update-url', url);
+  });
+
   ipcMain.on('toogle-dev-tool', () => {
-    if (winContent.isDevToolsOpened()) {
+    if (win.webContents.isDevToolsOpened()) {
       win.webContents.closeDevTools();
     } else {
       win.webContents.openDevTools({ mode: 'detach' });

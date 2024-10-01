@@ -9,8 +9,19 @@ export class BrowserService {
   canGoBack = false;
   canGoForward = false;
 
-// @ts-ignore
+  // @ts-ignore
   electronAPI = window.electronAPI;
+
+  constructor() {
+    this.electronAPI.updateUrl((newUrl: string) => {
+      this.updateUrl(newUrl);
+    });
+  }
+
+  // Met à jour l'URL avec la nouvelle URL reçue d'Electron
+  updateUrl(newUrl: string) {
+    this.url = newUrl;
+  }
 
   toogleDevTool() {
     this.electronAPI.toogleDevTool();
