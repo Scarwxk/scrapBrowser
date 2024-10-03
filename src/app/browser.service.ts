@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable, NgZone} from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
@@ -12,9 +12,12 @@ export class BrowserService {
   // @ts-ignore
   electronAPI = window.electronAPI;
 
-  constructor() {
+  constructor(private zone: NgZone) {
     this.electronAPI.updateUrl((newUrl: string) => {
-      this.updateUrl(newUrl);
+      this.zone.run(() => { // Utilisation de NgZone pour détecter les changements
+        this.updateUrl(newUrl);
+        this.updateUrlOnNavigation()
+      });
     });
   }
 
@@ -61,5 +64,12 @@ export class BrowserService {
 
     this.electronAPI.canGoForward()
       .then((canGoForward : boolean) => this.canGoForward = canGoForward);
+  }
+
+  updateUrlOnNavigation() {
+    // Utiliser l'API Electron pour écouter la fin de la navigation
+    this.electronAPI.onNavigationEnd((newUrl: string) => {
+      this.url = newUrl;
+    });
   }
 }

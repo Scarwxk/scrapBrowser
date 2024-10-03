@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, NgZone, OnInit} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AddressComponent } from './address/address.component';
 import { BackwardComponent } from './backward/backward.component';
@@ -15,6 +15,15 @@ import {HomeComponent} from "./home/home.component";
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
-  title = 'browser-template';
+export class AppComponent implements OnInit {
+  hoveredElement: { xpath: string, className: string, id: string } | null = null;
+
+  constructor(private zone: NgZone) {}
+
+  ngOnInit() {
+    // @ts-ignore
+    window.electronAPI.onNavigationEnd((url: string) => {
+      console.log('Page loaded:', url);
+    });
+  }
 }
