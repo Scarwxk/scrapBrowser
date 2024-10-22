@@ -60,7 +60,7 @@ app.whenReady().then(() => {
         const element = document.elementFromPoint(mouseX, mouseY);
 
         if (!element) {
-          return { xpath: null, className: null, id: null };
+          return;
         }
 
         // Fonction pour obtenir le XPath d'un élément
@@ -86,19 +86,56 @@ app.whenReady().then(() => {
 
         const xpath = getXPathForElement(element);
         const className = element.className || 'N/A';
-        const id = element.id || 'N/A'; // Récupération de l'ID de l'élément
+        const id = element.id || 'N/A';
 
-        return { xpath, className, id }; // Retourner l'objet avec xpath, className, et id
+        // Créer un élément div pour la popup (si elle n'existe pas déjà)
+        let popup = document.getElementById('info-popup');
+        if (!popup) {
+          popup = document.createElement('div');
+          popup.id = 'info-popup';
+          popup.style.position = 'fixed';
+          popup.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+          popup.style.color = 'white';
+          popup.style.padding = '5px';
+          popup.style.borderRadius = '4px';
+          popup.style.pointerEvents = 'none';
+          popup.style.display = 'none';
+          document.body.appendChild(popup);
+        }
+
+        // Mettre à jour le contenu de la popup
+        popup.innerHTML = \`XPath: \${xpath}<br>Class: \${className}<br>ID: \${id}\`;
+        popup.style.display = 'block';
+
+        // Mettre à jour la position de la popup tout en s'assurant qu'elle reste visible
+        const popupWidth = popup.offsetWidth;
+        const popupHeight = popup.offsetHeight;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        let left = mouseX + 15;
+        let top = mouseY + 15;
+
+        // Ajuster la position si la popup dépasse le côté droit
+        if (left + popupWidth > viewportWidth) {
+          left = viewportWidth - popupWidth - 15; // Décaler pour que la popup reste visible
+        }
+
+        // Ajuster la position si la popup dépasse le bas de la fenêtre
+        if (top + popupHeight > viewportHeight) {
+          top = viewportHeight - popupHeight - 15; // Décaler pour que la popup reste visible
+        }
+
+        popup.style.left = left + 'px';
+        popup.style.top = top + 'px';
       })();
-    `).then((elementInfo) => {
-        console.log("Element Info: ", elementInfo);
-        // Envoyer les informations de l'élément au processus de rendu (Angular)
-        win.webContents.send('element-info', elementInfo);
-      }).catch((err) => {
+    `).catch((err) => {
         console.error("Failed to get element info: ", err);
       });
     }
   });
+
+
 
 
   ipcMain.on('toogle-dev-tool', () => {
